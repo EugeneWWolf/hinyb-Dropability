@@ -9,7 +9,8 @@ mods.on_all_mods_loaded(function()
         end
     end
     params = {
-        drop_key = 522
+        drop_key = 522,
+        allow_skill_drop = true
     }
     params = Toml.config_update(_ENV["!guid"], params)
 end)
@@ -58,6 +59,9 @@ HookSystem.post_script_hook(gm.constants.ui_hover_tooltip, function(self, other,
 end)
 
 HookSystem.post_script_hook(gm.constants.hud_draw_skill_info, function(self, other, result, args)
+    if not params['allow_skill_drop'] then
+        return
+    end
     if not ImGui.IsKeyPressed(params['drop_key'], false) then
         return
     end
@@ -94,6 +98,11 @@ gui.add_to_menu_bar(function()
     local isChanged, keybind_value = ImGui.Hotkey("Drop Key", params['drop_key'])
     if isChanged then
         params['drop_key'] = keybind_value
+        Toml.save_cfg(_ENV["!guid"], params)
+    end
+    local allow_skill_drop, pressed = ImGui.Checkbox("Allow dropping abilities", params['allow_skill_drop'])
+    if pressed then
+        params['allow_skill_drop'] = allow_skill_drop
         Toml.save_cfg(_ENV["!guid"], params)
     end
 end)
